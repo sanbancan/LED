@@ -1,0 +1,90 @@
+#aboutmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#ledmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#softmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#micromenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#idemenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#linmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#segmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#matmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#cusmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#emitmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#papmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#printmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#linsimmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#dqmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#softpubmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+#softrepmenu {
+	Z-INDEX: 101; LEFT: 0px; VISIBILITY: hidden; POSITION: absolute; TOP: 58px
+}
+DIV.mainmenu {
+	BORDER-RIGHT: #c0c0c0 2px solid; BORDER-TOP: #c0c0c0 2px solid; BORDER-LEFT: #c0c0c0 2px solid; BORDER-BOTTOM: #c0c0c0 2px solid; TEXT-ALIGN: left
+}
+DIV.mainmenu A.aitem {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #ffffff; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+DIV.mainmenu A.aitem:hover {
+	COLOR: #c0c0c0; TEXT-DECORATION: underline
+}
+DIV.mainmenu A.mitem {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #ffffff; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+DIV.mainmenu A.mitem:hover {
+	COLOR: #c0c0c0; TEXT-DECORATION: none
+}
+DIV.mainmenu DIV.divitem {
+	MARGIN: 4px
+}
+DIV.level1 {
+	MARGIN-LEFT: 18px
+}
+DIV.smaptitle {
+	FONT-WEIGHT: normal; FONT-SIZE: 10pt; COLOR: #ffffff; TEXT-INDENT: 1pt; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; BACKGROUND-COLOR: #8c214a; TEXT-DECORATION: none
+}
+DIV.smaptitle1 {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; MARGIN-LEFT: 18px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+A.smapitem {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #8c214a; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+A.smapitem1 {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #8c214a; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+DIV.contact {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #ffffff; TEXT-INDENT: 1pt; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; BACKGROUND-COLOR: #8c214a; TEXT-DECORATION: none
+}
+A.acontact {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #8c214a; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; WHITE-SPACE: nowrap; TEXT-DECORATION: none
+}
+A.anews {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #8c214a; FONT-STYLE: normal; FONT-FAMILY: "MS Sans Serif", Arial, sans-serif; TEXT-DECORATION: none
+}

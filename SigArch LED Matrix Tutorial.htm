@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0051)http://www.acm.uiuc.edu/sigarch/tutorials/ledarray/ -->
+<HTML><HEAD><TITLE>SigArch: LED Matrix Tutorial</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1"><LINK 
+href="SigArch LED Matrix Tutorial_files/style.css" type=text/css rel=stylesheet>
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY bgColor=#ffffff leftMargin=0 
+background="SigArch LED Matrix Tutorial_files/background.gif" topMargin=0><MAP 
+name=topbar><AREA shape=RECT coords=245,0,290,16 
+  href="http://www.acm.uiuc.edu/sigarch/"><AREA shape=RECT coords=315,0,340,16 
+  href="http://www.acm.uiuc.edu/sigarch/tutorials/"><AREA shape=RECT 
+  coords=370,0,410,16 href="http://www.acm.uiuc.edu/sigarch/sitemap.html"><AREA 
+  shape=RECT coords=445,0,490,16 
+  href="http://www.acm.uiuc.edu/sigarch/siteindex.html"></MAP><IMG height=32 
+src="SigArch LED Matrix Tutorial_files/topbar.gif" width=550 useMap=#topbar 
+border=0><BR>
+<TABLE cellSpacing=8 cellPadding=0 width=535 border=0>
+  <TBODY>
+  <TR>
+    <TD vAlign=top width=124><FONT size=-1><IMG height=1 
+      src="SigArch LED Matrix Tutorial_files/blank.gif" width=1 
+      vspace=15><BR><B>Tutorials</B><BR><IMG height=1 
+      src="SigArch LED Matrix Tutorial_files/blank.gif" width=1 
+      vspace=5><BR><IMG height=5 
+      src="SigArch LED Matrix Tutorial_files/bullet.gif" width=5 
+      valign="absmiddle"> <A 
+      href="http://www.acm.uiuc.edu/sigarch/tutorials/adder/">4-Bit 
+      Adder</A><BR><IMG height=5 
+      src="SigArch LED Matrix Tutorial_files/bullet.gif" width=5 
+      valign="absmiddle"> <A 
+      href="http://www.acm.uiuc.edu/sigarch/tutorials/ledarray/">Interfacing an 
+      LED Dot-Matrix</A><BR><IMG height=5 
+      src="SigArch LED Matrix Tutorial_files/bullet.gif" width=5 
+      valign="absmiddle"> <A 
+      href="http://www.acm.uiuc.edu/sigarch/tutorials/logic_analyzer/">Using the 
+      Prism 3002 Logic Analyzer</A><BR></FONT></TD>
+    <TD vAlign=top width=387><FONT size=-1>
+      <H2>LED Matrix Tutorial</H2>
+      <P>You've probably seen one of those scrolling marquee LED signs that seem 
+      to be everywhere these days. If you're like me, you wondered how you could 
+      build your own LED sign without having to address each LED individually, 
+      which would be near impossible for a sign with more than just a few LEDs. 
+      This short tutorial will tell you how the signs actually work. 
+      <P>One of the first ways you might have thought of to do this is to put 
+      enough shift registers on your sign to hold a bit for every LED. Then, you 
+      could connect the cathodes to the appropriate bit of the right register, 
+      and you could connect all the anodes to positive voltage. To display 
+      something on your sign, you'd just shift in the data one bit at a time for 
+      the entire sign. Note that in this scheme, a "0" in the register would 
+      light the LED, and a "1" would turn it off. 
+      <P>This would work, and it might even do a decent job at it. But there are 
+      a few problems with it. First, it requires a chip for every four or eight 
+      LEDs, which is pretty annoying. Second, it probably won't be very bright 
+      since your register might only be able to sink of few mA of current per 
+      pin. 
+      <P>The solution to both of these problems is quite simple. We can take 
+      advantage of something known as "persistence of vision," which means that 
+      if you display several things very quickly, your eye will act as if they 
+      all were displayed simultaneously. This is how televisions appear to be 
+      displaying an entire picture when it's really only an electron beam 
+      displaying a single point at a time. 
+      <P>Instead of every row always displaying its data, we can display the 
+      data only for a single row at a time, but cycle through all the rows very 
+      quickly. Connect a single shift register output to all the cathodes in a 
+      column. Then, to display only the row you want, make sure that only one 
+      row is connected to +5V at any time. You can accomplish this with a ring 
+      counter, so that only one row is a logic "1" at any given time. 
+      <P>I've made a simple schematic for running an 8x8 grid of LEDs using a 
+      demultiplexer, some inverters, and a shift register. The two input lines 
+      to the demultiplexer decide which row will be illuminated. Then, you can 
+      use the clock and shift register input to move your data into the shift 
+      register. The transistors allow more brightness, and they also invert the 
+      shift register outputs for you. Click on the picture for a full-sized 
+      version. <A 
+      href="http://www.acm.uiuc.edu/sigarch/tutorials/ledarray/ledarray.gif"><IMG 
+      height=240 alt="Schematic for LED Matrix interfacing" 
+      src="SigArch LED Matrix Tutorial_files/ledarray_small.gif" width=320 
+      border=0></A> 
+      <P>That's really all there is to interfacing an LED array. If you have any 
+      questions, send them off to <A 
+      href="mailto:sigarch@acm.uiuc.edu">sigarch@acm.uiuc.edu</A>. 
+  </FONT></P></TD></TR>
+  <TR>
+    <TD width=124><IMG height=1 
+      src="SigArch LED Matrix Tutorial_files/blank.gif" width=1> </TD>
+    <TD align=right width=387><FONT color=#808080 size=-1>10/14/01 by Joel 
+      Jordan </FONT></TD></TR></TBODY></TABLE></BODY></HTML>

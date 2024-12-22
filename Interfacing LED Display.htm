@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0041)http://doc.union.edu/152/parallel_io.html -->
+<HTML><HEAD><TITLE>Interfacing LED Display</TITLE>
+<META http-equiv=Content-Language content=en-us>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR>
+<META content=FrontPage.Editor.Document name=ProgId></HEAD>
+<BODY>
+<P align=center><B>Interfacing LED Display</B></P>
+<P><B>Part I</B></P>
+<P>In this part of the exercise we will interface a 7-segment LED display to 
+port 0.The schematic for the hardware is given below. All resistors are about 
+360 ohms. Be sure to pay attention to details such as the wire colors and 
+orientation of the plug-in connectors.</P>
+<P><IMG height=391 src="Interfacing LED Display_files/parall2.gif" width=729 
+border=0></P>
+<P>Write a program to write random HEX numbers to the LED whenever the 
+pushbutton switch is pressed.</P>
+<UL>
+  <LI>When the pushbutton is pressed, read the value of a running timer to 
+  obtain the random value. (You will need to turn one of the timers on) 
+  <LI>Convert the least significant nibble of the value to the corresponding 
+  7-segment value. (A subroutine should be used for this). Note that the LED 
+  segments are ACTIVE LOW because a common anode display is used. 
+  <LI>Send the converted value to port 0. (Don't forget to configure port 0 as 
+  an output, and enable the crossbar switch). </LI></UL>
+<P>Run the program to the beginning of the subroutine (over and over) and ensure 
+that the value you are reading from the timer is the value that is being 
+displayed.</P>
+<P><B>Part II</B></P>
+<P>In the part of the exercise we are going to combine the temperature sensor 
+program and a modified version of your display code. The final program should 
+continuously display the least significant nibble of the most significant byte 
+of the temperature code (read from ADC0). Note that the ADC0 is set for left 
+justified data. </P>
+<P align=center>ADC0H : ADC0L<BR>n <FONT color=#ff0000>n</FONT> : n x</P>
+<P align=left><B>Report</B></P>
+<P align=left>Write a lab report that documents the exercises completed in this 
+session. You may refer to the web pages for procedure details, but do give an 
+overview of the procedure. Focus on the results and the concepts learned. </P>
+<P align=center>&nbsp;</P></BODY></HTML>

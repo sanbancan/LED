@@ -1,0 +1,156 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0041)http://www.ee.ttu.edu/lab/robot/trans.htm -->
+<HTML><HEAD><TITLE>Designing Transistor-based switching circuitry for 68HC1x Interfacing</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY 
+background="Designing Transistor-based switching circuitry for 68HC1x Interfacing_files/mybg.gif"><B>Designing 
+Transistor-based switching circuitry for 68HC1x Interfacing:</B><BR>(Seat of the 
+pants engineering)<BR><BR><BR>This page will take you through several practical 
+design problems illustrating the design of simple transistor circuits used to 
+allow digital 68HC1x outputs to control high current devices such as LEDs, relay 
+coils, motors etc.. In these discussions, we will primarily dwell on NPN bipolar 
+transistors, although PNP and MOSFET transistors will also be 
+discussed.<BR><BR><B>Starting point:</B> Don't expect the 68HC1x outputs to 
+source/sink loads of more than about 1mA. To do so may well result in eventual 
+failure of the 68HC1x port output circuitry. We will first look at a relatively 
+low current application (driving an LED or opto-isolator input), and discuss how 
+to size various resistors and to choose suitable transistors for buffering the 
+current. The following figure displays two common methods of buffering a 
+microcontroller output to enable driving of a high current load. Note that the 
+circuit shown in (b.) is crossed out. Although this circuit uses fewer 
+components (1 less resistor), it does not assure protection of the 68HC1x. 
+Should the collector-to-base junction of the transistor breakdown (e.g. due to a 
+large back EMF spike, should the load be an inductive motor instead of an LED, 
+or due to transistor failure due to a short circuit of the load etc.), the 
+output of the 68HC1x could be destroyed. The base resistor (R<SUB>b</SUB>) of 
+figure a.) assures effective isolation against such a catastrophe. <BR><IMG 
+height=270 alt="Typical transistor circuits for buffering of 68HC1x outputs." 
+src="Designing Transistor-based switching circuitry for 68HC1x Interfacing_files/trans.gif" 
+width=440><BR>Typical transistor circuits for buffering of 68HC1x 
+outputs.<BR><BR>Now lets talk about "seat of the pants" engineering. We will 
+commonly use wise "practical" practices such as derating specified component 
+values in order to assure the long term reliability of the circuit. Consider the 
+following specifications: LED from Radio 
+Shack:<BR>(I<SUB>LED</SUB>)<SUB>max</SUB> = 20mA (we'll derate this to 
+10mA).<BR>(V<SUB>LED</SUB>)<SUB>forward</SUB> = 1.7V .<BR><BR>2N2222 General 
+Purpose (Low Power) Transistor from Radio Shack<BR>Case style (TO-92 plastic 
+case -- low power!)<BR>Max. power dissapation ~ 500mW --- definitely derate this 
+to, say, 250mW (to be safe)<BR>I<SUB>c</SUB> max ~ 100mA -- derate to 
+67mA.<BR>Breakdown voltage- collector to emitter ~ 40V --&gt; shouldn't be a 
+problem as we're only using 5V !<BR><BR>When the transistor is off - it 
+dissapates no power. When the transistor is on (assume it's in saturation) then 
+P<SUB>D</SUB> = (V<SUB>CE</SUB>)<SUB>sat</SUB> x I<SUB>C</SUB> ~ 0.2V x 10mA = 
+2mW.<BR>Since 2mW &lt;&lt; 250mW, power dissapation is obviously not an 
+issue.<BR><BR>Calculating a value for R<SUB>C</SUB>: Use Ohm's law -- R = 
+V/I.<BR>V<SUB>Rc</SUB> = 5V - (V)<SUB>LED</SUB> - (V<SUB>CE</SUB>)<SUB>sat</SUB> 
+~ 5V - 1.7V - 0.2V ~ 3.1V .<BR>Now choose R<SUB>C</SUB> = 3.1V/10mA ~ 330 Ohms 
+(closest standard resistor value). <BR><BR>Calculate a value for 
+R<SUB>B</SUB>:<BR>Although h<SUB>fe</SUB> is advertised to be on the order of 
+100 for the 2N2222 or 2N3904, this current gain tends to drop significantly when 
+I<SUB>c</SUB> is large (i.e. when the transistor is conducting large collector 
+current) or when the transistor is well within the saturation region. Thus, in 
+calculating R<SUB>B</SUB> we will use h<SUB>fe</SUB> = 100, then to be certain 
+we drive the transistor hard into saturation, we will reduce R<SUB>B</SUB> to 
+1/3 of the previously calculated value. To assure good isolation, however, we 
+will not reduce R<SUB>B</SUB> below a value of 2.2kohm.<BR><BR>Thus, 
+I<SUB>B</SUB> = I<SUB>C</SUB> / h<SUB>fe</SUB> ==&gt; I<SUB>B</SUB> ~ 10mA/100 = 
+0.1mA. Now we calculate the voltage across R<SUB>B</SUB> as V<SUB>h</SUB>(68HC1x 
+pin) - V<SUB>BE</SUB>. The 68HC1x output high voltage [V<SUB>h</SUB>(68HC1x) ], 
+(under load - sourcing about 0.1 mA), I would guess to be about 4.5V. One could 
+actually look this up in the Motorola spec sheets, but I'm sure this guess will 
+get the job done for our purposes. Thus the voltage across R<SUB>B</SUB> ~ 
+4.5V-0.7V ~ 3.8V. Thus by ohm's law, R<SUB>B</SUB> = 3.8V/0.1mA = 38kohms. To 
+assure that we drive the transistor hard into saturation, we divide this value 
+by three, and use an actual value of:<BR>R<SUB>B</SUB> ~ 10 kohms. <BR>This will 
+still provide good isolation of the 68HC1x pin should the collector-to-base 
+junction of the transistor breakdown. {Imagine that the junction did break down 
+while the 68HC1x was in the "low" state (V<SUB>low</SUB> approaches 0 volts)-- 
+(68HC11 output low voltage). Then R<SUB>B</SUB> would have as much as 5 volts 
+across it, but using a minimum level of R<SUB>B</SUB> = 2.2k would limit the pin 
+current to about 2.25 mA, which is safely below the "absolute maximum" 10mA 
+rating published in the Motorola 68HC1x specifications.}<BR><BR>Now the prudent 
+thing would be to prototype the circuit, and actually measure pertinent voltages 
+and currents, and adjust values if necessary! For example, if we have the LED 
+turned on, the voltage across the transistors collector-to-emitter should be 
+less than 0.2 Volts. If not, we would make R<SUB>B</SUB> smaller and see if the 
+collector-to-emitter voltage drops. Thus we would experimentally assure that the 
+transistor goes well into the saturation mode.<BR><BR><BR>
+<HR align=left width="50%" color=red SIZE=6>
+<B>Design Example for a Higher Power Load</B><BR><BR>Let's say we need to drive 
+a 5V relay coil that pulls 150mA. The transistor, in saturation, would have to 
+dissapate as much as V<SUB>CE</SUB> (sat) x I<SUB>C</SUB> ~ 0.2V x 150mA = 30mW. 
+The 2N2222 or 2N3904 can certainly handle this, however the 150mA exceeds their 
+maximum specified collector current of ~90mA. Thus we need a higher power 
+transistor. We also note, that with a collector current of 150mA, even with an 
+h<SUB>fe</SUB> of 100, the 68HC1x pin would have to source 1.5mA of current, 
+which is too much. A good solution is to consider a "Darlington pair" 
+transistor[such as the TIP120 - available at Radio Shack] - (which has an 
+"effective" h<SUB>fe</SUB> of well over 1000! Another effective solution is to 
+use an "N-channel" MOSFET enhancement-mode transistor as a replacement for the 
+NPN transistor. [Even though a MOSFET draws no steady state current from the 
+68HC1x output pin, its still prudent to use a resistor between the 68HC1x output 
+pin and the "gate" of the MOSFET, should the Drain-to-gate junction of the 
+MOSFET break down]. The TIP120, e.g., also comes in a TO-5 package which 
+contains a large metal heat sink tab. If a heatsink is attached, the TIP120 is 
+capable of disspating <B>several watts</B> of power! Thus either a TIP120 or 
+power MOSFET (in a TO-5 package) is a good choice for switching high 
+power/current loads. The figure below illustrates use of a TIP120 darlington 
+transistor to switch the 150mA relay coil. Note that in addition to the "free- 
+wheeling" diode - absolutely essential when driving any sort of inductive load, 
+we have also placed a small capacitor (0.1 microfarads) across the coil. The 
+capacitor helps absorb the initial back EMF spike generated, as the diode cannot 
+"turn on" instantaneously. Figuring an effective h<SUB>fe</SUB> of 1000, we 
+calculate R<SUB>B</SUB> to be as follows:<BR><BR>Since the darlington contains 
+two base-emitter junctions in series, the total voltage from base to emitter is 
+~ 1.4 volts. Figuring again on V<SUB>h</SUB>(68HC1x) ~ 4.5V, the voltage across 
+R<SUB>B</SUB> comes out to 4.5V - 1.4 V ~ 3.1 V. Now figure I<SUB>B</SUB> = 
+150mA/1000 = 150 microamps, thus R<SUB>B</SUB> can be as large as 3.1V/150 
+microamps = 20kohms. We use a value of, say R<SUB>B</SUB> = 6.8k to assure that 
+the transistor is driven hard into saturation. With this large of a base 
+resistance, the 68HC1x output is now <B>really well isolated</B> against a 
+catastophic breakdown of the transistors collector-to-base junction! Of course, 
+if we wanted to feel even better about ourselves, we could also add an 
+optoisolator between the 68HC1x output and the transistor base.<BR><BR><IMG 
+height=314 alt="Darlington transistor circuit for driving a high current load." 
+src="Designing Transistor-based switching circuitry for 68HC1x Interfacing_files/darl.gif" 
+width=413><BR><B>Figure: Darlington transistor circuit for driving a high 
+current inductive load.</B><BR><BR>Again, note that we could also replace the 
+TIP120 Darlington transistor with a suitable N-channel MOSFET transistor. The 
+MOSFET transistors often perform better in such switching applications. Since 
+the gate of a MOSFET does not draw any steady state current from the 68HC1x 
+output pin, we can generally replace R<SUB>B</SUB> with something like 4.7k or 
+6.8k to merely protect the 68HC1x output in the event that the Drain-to-gate 
+junction should break down. When designing using MOSFETS, one would also go thru 
+the above procedures for checking for power dissapation. MOSFETs are usually 
+specified with a "maximum channel resistance" as (R<SUB>on</SUB>)<SUB>max</SUB>, 
+thus one could calculate the maximum MOSFET power disspation as I<SUB>D</SUB>^2 
+x (R<SUB>on</SUB>)<SUB>max</SUB>, and make sure that this is well under the 
+maximum rated power disspation. If driving, say, an LED, the resistor placed in 
+series with the LED (for the purpose of limiting the LED current) would also be 
+calculated as was done above.<BR><BR>Finally we show other circuits below. In 
+part a.) we have replaced the NPN bipolar transistor with an N-channel 
+enhancement MOSFET (avail. @ Radio Shack - the IFR510 power mosfet in TO-220 
+package). Here, when the gate-to-source voltage exceeds the V<SUB>GS</SUB> 
+threshold voltage, the MOSFET turns on. Although this threshold voltage varies 
+from one transistor to the next, it is typically around 2 - 4V, and the 68HC1x 
+output pins hopefully will generally have no problem switching the MOSFET on. 
+Often, however, some MOSFETS will have a higher Gate-to-source threshold 
+voltage, and the 68HC1x will not be able to turn the MOSFET on fully, in which 
+case a substantial voltage drop exists across the Drain-to-Source terminals, and 
+the MOSFET ends up "gittin real hot". You will want to check this by turning 
+your MOSFET on (while driving a load) and measuring this drain-to-source 
+voltage. If the problem persists, you may need to find MOSFETS with a lower 
+V<SUB>GS</SUB> threshold, or take other measures to raise the applied 
+Gate-to-source voltage.<BR><BR>The configurations shown in b.) and c.) below 
+differ in that they use PNP and P-channel MOSFET (enhancement mode) transistors, 
+such that the logic is reversed. That is, the LEDs would be turned on by writing 
+a "0" out to the 68HC1x port pin, and would be turned off by writing out a 
+"1".<BR><BR><IMG height=326 
+alt="Other transistor circuits for buffering of 68HC1x outputs." 
+src="Designing Transistor-based switching circuitry for 68HC1x Interfacing_files/trother.gif" 
+width=626><BR><B>Other transistor circuits for buffering of 68HC1x outputs - 
+note b.) &amp; c.) are controlled by reverse logic (applying a low voltage turns 
+on the LEDs).</B><BR><BR><BR><BR><A 
+href="http://www.ee.ttu.edu/lab/robot/index.html">Back to Home 
+Page</A><BR></BODY></HTML>

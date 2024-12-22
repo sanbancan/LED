@@ -1,0 +1,55 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0040)http://www.ee.ttu.edu/lab/robot/leds.htm -->
+<HTML><HEAD><TITLE>Driving LEDs and OptoIsolators</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY background="Driving LEDs and OptoIsolators_files/mybg.gif"><B>Driving LEDs 
+and Optoisolator Inputs:</B><BR><BR><BR>LEDs (Light Emitting Diodes) have 
+improved by orders of magnitude in recent years. They are commonly availible in 
+IR(infra-red), visible red, green, yellow, and just recently - blue. The most 
+power efficient LEDs are generally the IR and visible red LEDs. These are also 
+available in relatively high power configurations. The figure of merit for 
+guaging the "brightness" of an LED is by its "millicandle" rating. Early LEDs 
+were typically 5 or 10 millicandles, whereas "high brightness" red LEDs with 
+2000+ millicandle ratings are currently available at Radio Shack. The electrical 
+parameters of interest include the forward voltage drop of the LED (typically 
+1.7V for red LEDs), and the maximum forward current, which typically ranges from 
+I<SUB>LED</SUB> =5mA to as much as 50mA, with 20mA being a common rating. If you 
+want your LEDs to last, derate them! I.e. never drive the LED at more than about 
+2/3 of its "maximum" I<SUB>LED</SUB> rating!<BR><BR>The figure below shows 
+typical drive circuits for LEDs. Remember, when using an optoisolator, you are 
+also driving an LED!<BR><IMG height=200 alt="Typical LED Drive Circuits" 
+src="Driving LEDs and OptoIsolators_files/leds.gif" width=509><BR>Typical LED 
+Drive Circuits<BR><BR>Example (a) shows the method commonly used in the past by 
+TTU EE students for driving an LED. Although it will work OK for low-current 
+LEDs, I have heard reports that this method has "led"(no pun intended) to 
+students damaging their 68HC1x output ports by requiring the outputs to sink too 
+much current (leading to eventual thermo-nuclear damage - i.e. burning out of 
+the port output transistors).<BR>Example (b) shows an incremental improvement, 
+that allows the current load to be shared by a <U>pair</U> of port pins. To turn 
+the LED on, you write 0 to both port pins, and to turn the LED off, you write 1 
+to both port pins. This does tend to hog the few port pins availible on a 
+68HC11, but if you're using a 68HC12, you have ports to burn!(No pun 
+intended).<BR>Example (c) shows the safest way to drive an LED, by letting a 
+2N2222 or 2N3904 NPN transistor do all the work (although it requires more 
+wiring). These transistors can easily handle, say, up to 60mA of current.<BR>In 
+all cases, a current limiting resistor should always be placed in series with 
+the LED. Have the spec's available for your LED or optoisolator. Then 
+choose:<BR><BR>I<SUB>LED</SUB>(actual) &lt;= 
+(2/3)xI<SUB>LED</SUB>(max).<BR><BR>Then find the forward voltage across the LED, 
+V<SUB>LED</SUB> (typically 1.7V).<BR>The basically use Ohm's law to find the 
+value for R<SUB>s</SUB>, the series resistor as:<BR><BR>R<SUB>s</SUB> = 
+[V<SUB>cc</SUB> - V<SUB>LED</SUB>]/I<SUB>LED</SUB>(actual).<BR><BR>For example, 
+if V<SUB>cc</SUB>= +5V, and I<SUB>LED</SUB>(max)=20mA, and V<SUB>LED</SUB> = 
+1.7V, then maybe choose I<SUB>LED</SUB>(actual) = 13mA, so 
+that:<BR><BR>R<SUB>s</SUB> = [5V - 1.7V]/13mA = 254 ohms.<BR><BR>Finally round 
+this resistance to the nearest "standard" value (e.g. 220 
+ohms).<BR><BR><BR>These calculations have neglected the fact that V<SUB>OL</SUB> 
+for a 68HC1x output is probably going to be more like 0.2V, as opposed to 0V 
+etc.. If you want to be a purist, you can also account for, say, 
+V<SUB>CE</SUB>sat ~ 0.2V and whatnot, but the above equations are more than 
+accurate enough for most applications. A concientious designer would later go in 
+and measure the actual LED current, e.g. by measuring the voltage drop across Rs 
+and using Ohm's law to find I<SUB>LED</SUB>. <BR><BR><A 
+href="http://www.ee.ttu.edu/lab/robot/index.html">Back to Home 
+Page</A><BR></BODY></HTML>

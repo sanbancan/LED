@@ -1,0 +1,30 @@
+BODY {
+	SCROLLBAR-FACE-COLOR: #88224d; FONT-SIZE: 8pt; SCROLLBAR-HIGHLIGHT-COLOR: black; SCROLLBAR-SHADOW-COLOR: black; SCROLLBAR-3DLIGHT-COLOR: white; SCROLLBAR-ARROW-COLOR: #ffffff; SCROLLBAR-TRACK-COLOR: #c0c0c0; FONT-FAMILY: Arial, Helvetica, sans-serif; SCROLLBAR-DARKSHADOW-COLOR: black
+}
+DIV.phome {
+	FONT-SIZE: 8pt
+}
+TABLE {
+	FONT-SIZE: 8pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+HR {
+	COLOR: #8c214a
+}
+A {
+	FONT-WEIGHT: bold
+}
+A.bottom {
+	FONT-SIZE: 12px; COLOR: white; FONT-FAMILY: Arial
+}
+A.AMenu {
+	BACKGROUND-COLOR: #88224d
+}
+INPUT.search {
+	WIDTH: 140px; POSITION: relative; HEIGHT: 20px
+}
+.searchitem {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; PADDING-BOTTOM: 1px; PADDING-TOP: 1px; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.tale {
+	FONT-SIZE: 12px; COLOR: white
+}

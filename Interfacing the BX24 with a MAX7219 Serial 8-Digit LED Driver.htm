@@ -1,0 +1,1019 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0045)http://www.phanderson.com/basicx/max7219.html -->
+<HTML><HEAD><TITLE>Interfacing the BX24 with a MAX7219 Serial 8-Digit LED Driver</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY text=#000000 vLink=#551a8b aLink=#ff0000 link=#0000ff bgColor=#ffffff>
+<H3 align=center>Interfacing the BX24 with a MAX7219 Serial 8-Digit LED 
+Driver</H3>
+<P align=center><STRONG>copyright, Peter H. Anderson, Baltimore, MD, Jan, 
+'00</STRONG> 
+<P>
+<HR>
+
+<P><B>Modifications</B>. 
+<P>Subsequent to developing this discussion a <A 
+href="http://www.phanderson.com/basicx/max7219_rev.html">minor revision</A> has 
+been made in initializing the MAX7219. The routines which appear below do not 
+include this revision. 
+<P>In addition, a <A 
+href="http://www.phanderson.com/basicx/max7219_spi.html">new discussion</A> has 
+subsequently developed which uses the BX24's SPI Interface. 
+<P>
+<HR>
+
+<P>
+<P><STRONG>Introduction.</STRONG> 
+<P>The MAX7219 in a 24-pin DIP provides the capability of driving up to eight 
+7-segment common cathode LEDs using a three wire interface. <BR wp="br1"><BR 
+wp="br2">
+<P>A data sheet for the MAX7219 may be obtained from <A 
+href="http://www.maxim-ic.com/">Maxim</A>. Data sheets for the LSD3211-11 
+(MAN74) (0.3 inch) and LSD8151-10 (0.8 inch) are available at <A 
+href="http://www.ligitek.com/">the Ligitek website</A> Note that we offer a <A 
+href="http://www.phanderson.com/basicx/4_digit_display.html">kit</A> which 
+includes a MAX7219 and either four 0.3 inch or four 0.8 inch displays. <BR 
+wp="br1"><BR wp="br2">
+<P>Eight of the MAX7219 outputs (segment select) connect to the seven segments 
+plus the decimal point of each 7-seg LED. Eight other outputs (digit select) 
+connect to the common cathode on each of the eight 7-Segment LEDs. <BR 
+wp="br1"><BR wp="br2">
+<P>Wiring is simplified as only a single resistor is required to control the 
+current in each of the segments. <BR wp="br1"><BR wp="br2">
+<P>Other features include the ability to set the intensity, control each digit 
+using either BCD (Code B) translation or no translation and to place the device 
+in a low power mode. <BR wp="br1"><BR wp="br2">
+<P><STRONG>Program MAX7219_1.Bas.</STRONG> <BR wp="br1"><BR wp="br2">
+<P>This routine displays the numbers 0000 through 9999. <BR wp="br1"><BR 
+wp="br2">
+<P>The MAX7219 includes 16 registers. Registers 1 through 8 are used to store 
+the data that is output to Displays 1 through 8. Each bit of register 9 is used 
+to define whether or not Code B translation is to be used for that specific 
+display. Registers 10 (&amp;H0a) and 11 (&amp;H0b) are used to define the 
+intensity and number of displays. Register 12 controls whether the display is on 
+or shut down. Note that in the shut down mode, the data in the MAX7219 is 
+retained. <BR wp="br1"><BR wp="br2">
+<P>Outputs to the MAX7219 consist of 16 bits, the high eight being the register 
+and the low eight being the the data. <BR wp="br1"><BR wp="br2">
+<P>Thus, to display the number "8" on Digit 1 the following is output; <BR 
+wp="br1"><BR wp="br2"><PRE>   bx00000001 00001000 ' with Code B translation
+
+</PRE>
+<P>Thus, to display a digit "D" on display "N", the following general format may 
+be used; <BR wp="br1"><BR wp="br2"><PRE>        Max7219Out16(N * 256 + D) 
+or      Max7219Out16(N * 256 OR D) 
+
+</PRE>
+<P>Note the use of multiplying by 256 to force N to the upper byte. <BR 
+wp="br1"><BR wp="br2">
+<P>Thus, in routine Max7219PutUI, the number of thousands, hundreds, tens and 
+units are determined and output to displays 4, 3, 2 and 1. <BR wp="br1"><BR 
+wp="br2">
+<P>Sixteen bits of data is sent to the MAX7219 by bringing CS low and then 
+sending each of 16 data bits beginning with the most significant bit by setting 
+DAT to the appropriate state and then bringing CLK high and then low. <BR 
+wp="br1"><BR wp="br2">
+<P>Note that in Sub Max7219Out16, the integer is split into two bytes and first 
+the high and then the low bytes are output. At the conclusion, CS is brought 
+high. <BR wp="br1"><BR wp="br2"><PRE>' MAX7219_1.Bas
+'
+' Illustrates the use of a MAX7219 Serially Interfaced, 8-Digit
+' Display Driver.
+'
+' Example uses four MAN74 7-Segment LEDs (Common Cathode) as Digits
+' 3, 2, 1 and 0.
+'
+'  BX-24 	             MAX7219
+'
+'  CS (term 12) ------------ LOAD (term 12)
+'  CLK (term 11) ----------- CLK (term 13)
+'  DAT (term 10) ----------- DIN (term 1)
+'
+' In initializing the MAX7219;
+'
+'    Decode Mode (Register 9) set for Code B on all digits.
+'    Intensity (Register 10) set for 15/32
+'    Scan Limit (Register 11) set for Digits 0, 1, 2, 3
+'
+' The numbers 0000 - 9999 are sequentially displayed.  No sign and no
+' zero suppression.
+'
+' Note that in outputting the 16 bit quantity, the quantity is split
+' into a high and low byte and each is then output.
+'
+' This was a part of a Senior Project by Kenrick David.
+'
+' copyright, Peter H. Anderson, Baltimore, MD, Dec, '99
+
+   Const DecodeModeCode as Integer = &amp;H900
+   Const IntensityCode as Integer = &amp;Ha00
+   Const ScanLimitCode as Integer = &amp;Hb00
+   Const TurnOnCode as Integer = &amp;Hc00
+
+   Const CS as Byte = 12
+   Const CLK as Byte = 11
+   Const DAT as Byte = 10
+
+Sub Main()
+
+   Dim Q as Integer
+   Dim N as Integer
+
+   Call OpenSerialPort(1, 19200) ' used for debugging
+   Do
+      Call Max7219Init()
+
+      For N = 0 to 9999
+         Call Max7219PutUI(N) ' unsigned intger, no zero suppression
+         Call Sleep(1.0)
+      Next
+   Loop
+End Sub
+
+
+Sub Max7219Init()  
+' intialize, Code B, 15/32 intensity, Digits 0, 1, 2, 3, On
+   Dim N as Integer
+
+   Call Max7219Out16 (DecodeModeCode OR &amp;Hff) 'Sets Decode Mode
+   Call Max7219Out16 (IntensityCode  OR &amp;H07) 'Sets Intensity
+   Call Max7219Out16 (ScanLimitCode OR &amp;H03) 'Sets Scan Limit
+   Call Max7219Out16 (TurnOnCode OR &amp;H01) ' Turn it on
+End Sub
+
+Sub Max7219PutUI(ByVal Q as Integer) ' 4 Digits
+   Dim D as Integer
+ 
+   D = Q\1000
+   Call Max7219Out16(4*256 + D) 
+        ' note 00000100 in high byte - Digit 3
+   Q = Q Mod 1000
+            
+   D = Q\100
+   Call Max7219Out16(3*256 + D) ' 0000 0011 in high byte - Digit 2
+   Q = Q mod 100
+  
+   D = Q\10
+   Call Max7219Out16(2*256 + D) ' Digit 1
+   Q = Q Mod 10 
+          
+   D = Q
+   Call Max7219Out16(1*256 + D) ' Digit 0   
+End Sub  
+            
+Sub Max7219Out16(ByVal X as Integer)
+' shifts out 16-bit quantity, most sig bit first
+   Dim N as integer
+   Dim Bit as Byte
+   Dim H as Byte, L as Byte
+
+   Call PutPin(CS, 1)
+
+   Call Putpin(CLK, 0)
+   Call Putpin(DAT, 0)
+   Call Putpin(CS, 0)
+   
+   ' split the integer into high and low bytes
+   H =  CByte(X\256)
+   L = CByte(X - (CInt(H)*256))
+
+   For N = 1 to 8 ' output the high byte
+      Bit = H AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) Then
+         ' Call PutB(1)   ' for debugging
+         Call Putpin(DAT, 1)
+      Else
+         ' Call PutB(0)
+         Call Putpin(DAT, 0)
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      H = H * 2
+   Next
+
+   'Call PutByte(Asc(" "))
+         
+   For N = 1 to 8 ' output the low byte
+      Bit = L AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) then
+         'Call PutB(1)   
+         Call Putpin(DAT, 1)
+      Else
+         'Call PutB(0)
+         Call Putpin(DAT, 0)            
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      L = L * 2  
+   Next
+   'Call NewLine()
+   Call Putpin(CS, 1)  
+End Sub   
+       
+</PRE>
+<P><STRONG>Program MAX7219_2.Bas.</STRONG> <BR wp="br1"><BR wp="br2">
+<P>This program sequentially displays the numbers -100 through 9999 with leading 
+zero suppression. <BR wp="br1"><BR wp="br2">
+<P>In routine Max7219PutI, the sign of the passed value is tested and if 
+negative, a "minus sign" is displayed. With both positive and negative 
+quantities, if zero suppression is true, a "blank" is displayed if the digit is 
+zero. Zero suppression is set to false is a leading digit is nonzero. In any 
+event, the least significant digit is displayed. <BR wp="br1"><BR wp="br2">
+<P>Note that the Code B codes for a "blank" and "minus" are &amp;H0f and 
+&amp;H0a, respectively. <BR wp="br1"><BR wp="br2"><PRE>' MAX7219_2.Bas
+'
+' Illustrates the use of a MAX7219 Serially Interfaced, 8-Digit
+' Display Driver.
+'
+' Example uses four MAN74 7-Segment LEDs (Common Cathode) as Digits 
+' 3, 2, 1 and 0.
+'
+' BX-24     MAX7219
+'
+'  CS (term 12) ------------ LOAD (term 12)
+'  CLK (term 11) ----------- CLK (term 13)
+'  DAT (term 10) ----------- DIN (term 1)
+'
+' In initializing the MAX7219;
+'    Decode Mode (Register 9) set for Code B on all digits.
+'    Intensity (Register 10) set for 15/32
+'    Scan Limit (Register 11) set for Digits 0, 1, 2, 3
+'
+' The numbers -100 through 9999 are sequentially displayed.  Uses
+' zero suppression and negative sign for negative quantities.
+'
+' copyright, Peter H. Anderson, Baltimore, MD, Dec, '99
+
+Const DecodeModeCode as Integer = &amp;H900
+Const IntensityCode as Integer = &amp;Ha00
+Const ScanLimitCode as Integer = &amp;Hb00
+Const TurnOnCode as Integer = &amp;Hc00
+
+Const BLANK as Integer = &amp;H0f ' code B for all segments off
+Const MINUS as Integer = &amp;H0a ' code B for minus sign
+
+Const CS as Byte = 12
+Const CLK as Byte = 11
+Const DAT as Byte = 10
+
+Sub Main()
+
+   Dim Q as Integer
+   Dim N as Integer
+
+   Call OpenSerialPort(1, 19200) ' used for debugging
+   Do
+      Call Max7219Init()
+
+      For N = -100 to 9999
+         Call Max7219PutI(N, True) ' signed intger, zero suppression
+         Call Sleep(1.0)
+      Next
+   Loop
+End Sub
+
+Sub Max7219Init()  
+    ' intialize, Code B, 15/32 intensity, Digits 0, 1, 2, 3, On
+   Dim N as Integer
+
+   Call Max7219Out16 (DecodeModeCode OR &amp;Hff) 'Sets Decode Mode
+   Call Max7219Out16 (IntensityCode  OR &amp;H07) 'Sets Intensity
+   Call Max7219Out16 (ScanLimitCode OR &amp;H03) 'Sets Scan Limit
+   Call Max7219Out16 (TurnOnCode OR &amp;H01) ' Turn it on
+End Sub
+
+Sub Max7219PutI(ByVal Q as Integer, ByVal ZeroSuppress as Boolean) 
+
+   Dim D as Integer
+
+   If (Q &lt; 0) Then ' if its negative
+      Q = -Q 
+      Call Max7219Out16(4*256 + MINUS)
+      D = Q\100
+      If ((D=0) AND ZeroSuppress) Then
+         Call Max7219Out16(3*256 + BLANK)
+      Else
+         ZeroSuppress = False
+         Call Max7219Out16(3*256 + D)
+      End If
+    
+      Q = Q MOD 100
+      D = Q\10
+
+      If ((D=0) AND ZeroSuppress) Then
+         Call Max7219Out16(2*256 + BLANK)
+      Else         
+         Call Max7219Out16(2*256 + D)
+      End If
+    
+      D = Q MOD 10
+      Call Max7219Out16(1*256 + D) 
+                 ' In any event, display the least sig digit
+   Else
+      D = Q\1000
+      If ((D=0) AND ZeroSuppress) Then
+         Call Max7219Out16(4*256 + BLANK)
+      Else
+         ZeroSuppress = False
+         Call Max7219Out16(4*256 + D)
+      End If
+    
+      Q = Q MOD 1000
+      D = Q\100
+
+      If ((D=0) AND ZeroSuppress) Then
+         Call Max7219Out16(3*256 + BLANK)
+      Else
+         ZeroSuppress = False
+         Call Max7219Out16(3*256 + D)
+      End If
+    
+      Q = Q MOD 100
+      D = Q\10
+
+      If ((D=0) AND ZeroSuppress) Then
+         Call Max7219Out16(2*256 + BLANK)
+      Else        
+         Call Max7219Out16(2*256 + D)
+      End If
+
+      D = Q MOD 10
+      Call Max7219Out16(1*256 + D) 
+' In any event, display the least sig digit
+   End If
+    
+End Sub  
+            
+Sub Max7219Out16(ByVal X as Integer)
+' shifts out 16-bit quantity, most sig bit first
+   Dim N as integer
+   Dim Bit as Byte
+   Dim H as Byte, L as Byte
+
+   Call PutPin(CS, 1)
+
+   Call Putpin(CLK, 0)
+   Call Putpin(DAT, 0)
+   Call Putpin(CS, 0)
+
+   'Call PutI(x) ' for debugging
+   'Call NewLine()
+' split the integer into high and low bytes
+   H =  CByte(X\256)
+   L = CByte(X - (CInt(H)*256))
+
+   For N = 1 to 8 ' output the high byte
+      Bit = H AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) Then
+         ' Call PutB(1)   ' for debugging
+         Call Putpin(DAT, 1)
+      Else
+         ' Call PutB(0)
+         Call Putpin(DAT, 0)
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      H = H * 2
+   Next
+
+   'Call PutByte(Asc(" "))
+         
+   For N = 1 to 8 ' output the low byte
+      Bit = L AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) then
+         'Call PutB(1)   
+    Call Putpin(DAT, 1)
+      Else
+         'Call PutB(0)
+         Call Putpin(DAT, 0)            
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      L = L * 2  
+   Next
+   'Call NewLine()
+   Call Putpin(CS, 1)  
+End Sub   
+
+</PRE>
+<P><STRONG>Program MAX7219_3.Bas.</STRONG> <BR wp="br1"><BR wp="br2">
+<P>This program displays a number in four digit hexadecimal. Note that Code B 
+translation does not include the characters "a", "b", "c", "d", "e" and "f". 
+Thus the decode mode in register 9 is set for no decode. <BR wp="br1"><BR 
+wp="br2">
+<P>Note that without Code B decode, the digit zero is X111 1110 or &amp;H7e. 
+That is all segments except segment "g" are turned on. <BR wp="br1"><BR 
+wp="br2">
+<P>All digits 0 - 9 and characters A - F are stored array HexVals. Note however, 
+that as an array begins with 1 and not zero, element N of the array contains the 
+data to output the number N-1. That is, HexVals(1) contains the data to display 
+a "zero". <BR wp="br1"><BR wp="br2">
+<P>Note that the array is declared as global to avoid passing the array to 
+subroutines. <BR wp="br1"><BR wp="br2">
+<P>In routine Max7219PutHexI, the quantity is separated into the high and low 
+bytes and each nibble is isolated. <BR wp="br1"><BR wp="br2">
+<P>The program also includes a "flash HELP" routine. <BR wp="br1"><BR wp="br2">
+<P>Note that a "blank" is 0000 0000 (no segments lit) and a "minus" is 0000 0001 
+(only the "g" segment). <BR wp="br1"><BR wp="br2"><PRE>' Max7219_3.Bas
+'
+' Illustrates the use of a MAX7219 Serially Interfaced, 8-Digit
+' Display Driver.
+'
+' Example uses four MAN74 7-Segment LEDs (Common Cathode) as Digits
+' 3, 2, 1 and 0.
+'
+'  BX-24    		     MAX7219
+'
+'  CS (term 12) ------------ LOAD (term 12)
+'  CLK (term 11) ----------- CLK (term 13)
+'  DAT (term 10) ----------- DIN (term 1)
+'
+' In initializing the MAX7219;
+'    Decode Mode (Register 9) set for not Code B on all digits.
+'    Intensity (Register 10) set for 15/32
+'    Scan Limit (Register 11) set for Digits 0, 1, 2, 3
+'
+' Displays in Hex.  Does not use Code B Font
+'
+' copyright, Peter H. Anderson, Baltimore, MD, Dec, '99
+
+   Const DecodeModeCode as Integer = &amp;H900
+   Const IntensityCode as Integer = &amp;Ha00
+   Const ScanLimitCode as Integer = &amp;Hb00
+   Const TurnOnCode as Integer = &amp;Hc00
+
+   Const BLANK as Integer = &amp;H00 
+   Const MINUS as Integer = &amp;H01
+
+   Const HVal as Byte = bx00110111 ' "H"
+   Const EVal as Byte = bx01001111 ' "E"
+   Const LVal as Byte = bx00001110 ' "L"
+   Const PVal as Byte = bx01100111 ' "P"
+
+   Const CS as Byte = 12
+   Const CLK as Byte = 11
+   Const DAT as Byte = 10
+
+   Dim HexVals(1 to 16) as Byte
+
+   
+Sub Main()
+
+   Dim Q as Integer
+   Dim N as Integer
+
+   HexVals(1) = bx01111110  ' 0
+   HexVals(2) = bx00110000  ' 1
+   HexVals(3) = bx01101101  ' 2
+   HexVals(4) = bx01111001  ' 3
+
+   HexVals(5) = bx00110011  ' 4
+   HexVals(6) = bx01011011  ' 5
+   HexVals(7) = bx01011111  ' 6
+   HexVals(8) = bx01110000  ' 7
+
+   HexVals(9) = bx01111111  ' 8
+   HexVals(10) = bx01111011  ' 9
+   HexVals(11) = bx01110111  ' a
+   HexVals(12) = bx00011111  ' b
+
+   HexVals(13) = bx01001110  ' c
+   HexVals(14) = bx00111101  ' d
+   HexVals(15) = bx01001111  ' e
+   HexVals(16) = bx01000111  ' f
+
+
+   Call OpenSerialPort(1, 19200) ' used for debugging
+   Do
+      Call Max7219Init()
+
+      Call Max7219FlashHelp(10)  ' flash "HELP" message 10 times
+
+      For N = 0 to &amp;H7fff  ' display values in 4 digit hex
+         Call Max7219PutHexI(N) 
+         Call Sleep(1.0)
+      Next
+      
+   Loop
+End Sub
+
+Sub Max7219Init()  ' intialize, Not Code B, 15/32 intensity, 
+                        ' Digits 0, 1, 2, 3, On
+   Dim N as Integer
+
+   Call Max7219Out16 (DecodeModeCode OR &amp;H00) 
+         'Sets Decode Mode as No Code B
+   Call Max7219Out16 (IntensityCode  OR &amp;H07) 'Sets Intensity
+   Call Max7219Out16 (ScanLimitCode OR &amp;H03) 'Sets Scan Limit
+   Call Max7219Out16 (TurnOnCode OR &amp;H01) ' Turn it on
+End Sub
+
+Sub Max7219PutHexI(ByVal Q as Integer) 
+
+   Dim H as Byte, L as Byte
+   Dim Index as Integer
+
+   ' split the integer into two bytes
+   H =  CByte(Q\256)
+   L = CByte(Q - (CInt(H)*256))
+
+   Index = CInt(H\16 + 1)  ' high nibble
+   Call Max7219Out16(4*256 + CInt(HexVals(Index)))
+   Index = CInt((H AND &amp;H0f) + 1) ' low nibble
+   Call Max7219Out16(3*256 + CInt(HexVals(Index)))
+   Index = CInt(L\16 + 1)  ' high nibble
+   Call Max7219Out16(2*256 + CInt(HexVals(Index)))
+   Index = CInt((L AND &amp;H0f) + 1) ' low nibble
+   Call Max7219Out16(1*256 + CInt(HexVals(Index)))
+End Sub
+
+Sub Max7219FlashHelp(ByVal Num as Byte)
+   Dim N as Byte
+   For N = 1 to Num
+      Call Max7219Out16(4*256 + CInt(HVal))
+      Call Max7219Out16(3*256 + CInt(EVal))
+      Call Max7219Out16(2*256 + CInt(LVal))
+      Call Max7219Out16(1*256 + CInt(PVal))
+
+      Call Sleep(0.5)
+
+      Call Max7219Out16(4*256 + BLANK)
+      Call Max7219Out16(3*256 + BLANK)
+      Call Max7219Out16(2*256 + BLANK)
+      Call Max7219Out16(1*256 + BLANK)
+      
+      Call Sleep(0.5)
+   Next
+End Sub
+            
+Sub Max7219Out16(ByVal X as Integer)
+' shifts out 16-bit quantity, most sig bit first
+   Dim N as integer
+   Dim Bit as Byte
+   Dim H as Byte, L as Byte
+
+   Call PutPin(CS, 1)
+
+   Call Putpin(CLK, 0)
+   Call Putpin(DAT, 0)
+   Call Putpin(CS, 0)
+
+   'Call PutI(x) ' for debugging
+   'Call NewLine()
+' split the integer into high and low bytes
+   H =  CByte(X\256)
+   L = CByte(X - (CInt(H)*256))
+
+   For N = 1 to 8 ' output the high byte
+      Bit = H AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) Then
+         ' Call PutB(1)   ' for debugging
+         Call Putpin(DAT, 1)
+      Else
+         ' Call PutB(0)
+         Call Putpin(DAT, 0)
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      H = H * 2
+   Next
+
+   'Call PutByte(Asc(" "))
+         
+   For N = 1 to 8 ' output the low byte
+      Bit = L AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) then
+         'Call PutB(1)   
+    Call Putpin(DAT, 1)
+      Else
+         'Call PutB(0)
+         Call Putpin(DAT, 0)            
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      L = L * 2  
+   Next
+   'Call NewLine()
+   Call Putpin(CS, 1)  
+End Sub   
+
+</PRE>
+<P><STRONG>Program MAX7219_4.Bas.</STRONG> <BR wp="br1"><BR wp="br2">
+<P>This program illustrates how a float (single) might be displayed. For 
+example, assume a temperature is stored in Temperature as a Single. <BR 
+wp="br1"><BR wp="br2"><PRE>     Temperature_Int = CInt (Temperature * 10)
+     Call  Max7219PutSingle(N, 1, True) 
+
+</PRE>
+<P>In this case, Max7219PutSingle displays the temperature with one digit after 
+the decimal point with leading zero suppression. <BR wp="br1"><BR wp="br2">
+<P>Note that the MAN74 has a right hand decimal point. Thus, if "place is 1", 
+the decimal point on display 2 is turned on. Note that a decimal point is 
+displayed by making the most significant bit of the data a "one". <BR 
+wp="br1"><BR wp="br2">
+<P>The implementation of Max7219PutSingle turned out to be a bit more complex 
+than I had thought and there may well be errors. <BR wp="br1"><BR wp="br2"><PRE>' Max7219_4.Bas
+'
+' Illustrates the use of a MAX7219 Serially Interfaced, 8-Digit
+' Display Driver.
+'
+' Example uses four MAN74 7-Segment LEDs (Common Cathode) as Digits 
+' 3, 2, 1 and 0.
+'
+' BX-24                      MAX7219
+'
+'  CS (term 12) ------------ LOAD (term 12)
+'  CLK (term 11) ----------- CLK (term 13)
+'  DAT (term 10) ----------- DIN (term 1)
+'
+' In initializing the MAX7219;
+'    Decode Mode (Register 9) set for Code B on all digits.
+'    Intensity (Register 10) set for 15/32
+'    Scan Limit (Register 11) set for Digits 0, 1, 2, 3
+'
+' Illustrates how to display a float  Uses zero suppression and
+' negative sign for negative quantities.
+'
+' copyright, Peter H. Anderson, Baltimore, MD, Dec, '99
+
+Const DecodeModeCode as Integer = &amp;H900
+Const IntensityCode as Integer = &amp;Ha00
+Const ScanLimitCode as Integer = &amp;Hb00
+Const TurnOnCode as Integer = &amp;Hc00
+
+Const BLANK as Integer = &amp;H0f ' code B for all segments off
+Const MINUS as Integer = &amp;H0a ' code B for minus sign
+
+Const DP as Integer = &amp;H80
+
+Const CS as Byte = 12
+Const CLK as Byte = 11
+Const DAT as Byte = 10
+
+Sub Main()
+
+   Dim Q as Integer
+   Dim N as Integer
+
+   Call OpenSerialPort(1, 19200) ' used for debugging
+   Do
+      Call Max7219Init()
+
+      For N = -100 to 9999
+         Call Max7219PutSingle(N, 2, True) 
+         Call Sleep(1.0)
+      Next
+   Loop
+End Sub
+
+Sub Max7219Init()  ' intialize, Code B, 15/32 intensity, 
+' Digits 0, 1, 2, 3, On
+   Dim N as Integer
+
+   Call Max7219Out16 (DecodeModeCode OR &amp;Hff) 'Sets Decode Mode
+   Call Max7219Out16 (IntensityCode  OR &amp;H07) 'Sets Intensity
+   Call Max7219Out16 (ScanLimitCode OR &amp;H03) 'Sets Scan Limit
+   Call Max7219Out16 (TurnOnCode OR &amp;H01) ' Turn it on
+End Sub
+
+Sub Max7219PutSingle(ByVal Q as Integer, _
+                     ByVal Place as Byte, _
+                     ByVal ZeroSuppress as Boolean) 
+
+   Dim D as Integer
+
+   If (Q &lt; 0) Then ' if its negative
+      Q = -Q 
+      Call Max7219Out16(4*256 + MINUS)
+      D = Q\100
+      If ( (D=0) AND ZeroSuppress AND (Place &lt;&gt; 2) ) Then
+         Call Max7219Out16(3*256 + BLANK)
+      Else
+         ZeroSuppress = False        
+         If (Place = 2) Then
+            Call Max7219Out16(3*256 + D + DP)
+         Else
+            Call Max7219Out16(3*256 + D)
+         End If
+      End If
+    
+      Q = Q MOD 100
+      D = Q\10
+
+      If ( (D=0) AND ZeroSuppress AND (Place &lt;&gt; 1) ) Then
+         Call Max7219Out16(2*256 + BLANK)
+      Else      
+         If (Place = 1) Then   
+            Call Max7219Out16(2*256 + D + DP)
+         Else
+            Call Max7219Out16(2*256 + D)
+         End If
+      End If
+    
+      D = Q MOD 10
+      Call Max7219Out16(1*256 + D) 
+              ' In any event, display the least sig digit
+   Else
+      D = Q\1000
+      If ( (D=0) AND ZeroSuppress AND (Place &lt;&gt;3) )Then
+         Call Max7219Out16(4*256 + BLANK)
+      Else
+         ZeroSuppress = False
+         If (Place = 3) Then
+            Call Max7219Out16(4*256 + D + DP)
+         Else
+            Call Max7219Out16(4*256 + D)
+         End If
+      End If
+    
+      Q = Q MOD 1000
+      D = Q\100
+
+      If ( (D=0) AND ZeroSuppress AND (Place &lt;&gt;2) ) Then
+         Call Max7219Out16(3*256 + BLANK)
+      Else
+         ZeroSuppress = False
+         If (Place = 2) Then
+            Call Max7219Out16(3*256 + D + DP)
+         Else
+            Call Max7219Out16(3*256 + D)
+         End If
+      End If
+    
+      Q = Q MOD 100
+      D = Q\10
+
+      If ((D=0) AND ZeroSuppress AND (Place &lt;&gt;1) ) Then
+         Call Max7219Out16(2*256 + BLANK)
+      Else  
+         If (Place = 1) Then      
+            Call Max7219Out16(2*256 + D + DP)
+         Else
+            Call Max7219Out16(2*256 + D)
+         End If
+      End If
+
+      D = Q MOD 10
+      Call Max7219Out16(1*256 + D) 
+            ' In any event, display the least sig digit
+   End If
+    
+End Sub  
+            
+Sub Max7219Out16(ByVal X as Integer)
+' shifts out 16-bit quantity, most sig bit first
+   Dim N as integer
+   Dim Bit as Byte
+   Dim H as Byte, L as Byte
+
+   Call PutPin(CS, 1)
+
+   Call Putpin(CLK, 0)
+   Call Putpin(DAT, 0)
+   Call Putpin(CS, 0)
+
+   'Call PutI(x) ' for debugging
+   'Call NewLine()
+' split the integer into high and low bytes
+   H =  CByte(X\256)
+   L = CByte(X - (CInt(H)*256))
+
+   For N = 1 to 8 ' output the high byte
+      Bit = H AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) Then
+         ' Call PutB(1)   ' for debugging
+         Call Putpin(DAT, 1)
+      Else
+         ' Call PutB(0)
+         Call Putpin(DAT, 0)
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      H = H * 2
+   Next
+
+   'Call PutByte(Asc(" "))
+         
+   For N = 1 to 8 ' output the low byte
+      Bit = L AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) then
+         'Call PutB(1)   
+    Call Putpin(DAT, 1)
+      Else
+         'Call PutB(0)
+         Call Putpin(DAT, 0)            
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      L = L * 2  
+   Next
+   'Call NewLine()
+   Call Putpin(CS, 1)  
+End Sub   
+
+</PRE>
+<P><STRONG>Program MAX7219_5.Bas.</STRONG> <BR wp="br1"><BR wp="br2">
+<P>This program illustrates how the intensity of the displays might be varied. 
+One application that comes to mind is to use a CdS resistor in a voltage divider 
+arrangement. <BR wp="br1"><BR wp="br2">
+<P>In this routine I used a 10K potentiometer between +5.0 VDC and GRD with the 
+wiper connected to Pin 13 of the BX24. An A/D reading is made and this is mapped 
+into an intensity value in the range of 1 - 15. This value is then loaded into 
+the intensity register at address &amp;H0a. <BR wp="br1"><BR wp="br2"><PRE>' Max7219_5.Bas
+'
+' Illustrates the use of a MAX7219 Serially Interfaced, 8-Digit 
+' Display Driver.
+'
+' Varies intensity in relation to a potentiometer on Pin 12 of BX24. 
+
+' Note that this might be modified to use a cadmium sulphide
+' resistor in a voltage divider arrangement to compensate for the
+' ambient light.
+'
+' Example uses four MAN74 7-Segment LEDs (Common Cathode) as 
+' Digits 3, 2, 1 and 0.
+'
+'  BX-24                     MAX7219
+'
+'  CS (term 12) ------------ LOAD (term 12)
+'  CLK (term 11) ----------- CLK (term 13)
+'  DAT (term 10) ----------- DIN (term 1)
+'
+' In initializing the MAX7219;
+'    Decode Mode (Register 9) set for Code B on all digits.
+'    Note that intensity is set on the fly.
+'    Scan Limit (Register 11) set for Digits 0, 1, 2, 3
+'
+' The numbers 0000 - 9999 are sequentially displayed.  No sign and no
+' zero suppression.
+'
+' copyright, Peter H. Anderson, Baltimore, MD, Dec, '99
+
+Const DecodeModeCode as Integer = &amp;H900
+Const IntensityCode as Integer = &amp;Ha00
+Const ScanLimitCode as Integer = &amp;Hb00
+Const TurnOnCode as Integer = &amp;Hc00
+
+Const CS as Byte = 12
+Const CLK as Byte = 11
+Const DAT as Byte = 10
+
+Sub Main()
+
+   Dim Q as Integer, N as Integer
+   Dim LightIntensitySetting as Byte
+
+   Call OpenSerialPort(1, 19200) ' used for debugging
+   Do
+      Call Max7219Init()
+
+      For N = 0 to 9999
+         LightIntensitySetting = MeasLightIntensity()
+         Call Max7219PutUI(N, LightIntensitySetting) 
+              ' unsigned intger,  no zero suppression
+         Call Sleep(1.0)
+      Next
+   Loop
+End Sub
+
+Sub Max7219Init()  
+ ' initialize, Code B, 15/32 intensity, Digits 0, 1, 2, 3, On
+   Dim N as Integer
+
+   Call Max7219Out16 (DecodeModeCode OR &amp;Hff) 'Sets Decode Mode
+   Call Max7219Out16 (ScanLimitCode OR &amp;H03) 'Sets Scan Limit
+   Call Max7219Out16 (TurnOnCode OR &amp;H01) ' Turn it on
+End Sub
+
+Sub Max7219PutUI(ByVal Q as Integer, ByVal Intensity as Byte) 
+                 ' 4 Digits
+   Dim D as Integer
+ 
+   Call Max7219Out16 (IntensityCode OR CInt(Intensity) )
+        ' set the intensity
+   D = Q\1000
+   Call Max7219Out16(4*256 + D) ' note 00000100 in high byte - Digit
+3
+   Q = Q Mod 1000
+            
+   D = Q\100
+   Call Max7219Out16(3*256 + D) ' 0000 0011 in high byte - Digit 2
+   Q = Q mod 100
+  
+   D = Q\10
+   Call Max7219Out16(2*256 + D) ' Digit 1
+   Q = Q Mod 10 
+          
+   D = Q
+   Call Max7219Out16(1*256 + D) ' Digit 0   
+End Sub  
+
+Function MeasLightIntensity() as Byte 
+' measures voltage on pin 13 and returns a number in the range 
+' of 1 - 15
+   Dim Band as Integer
+   Dim Val as Integer
+
+   Band = GetADC(14)
+   Call PutI(Band)
+   Call NewLine()
+   Val = (Band\ (1024\15)) + 1 ' map Band into 15 equal ranges        
+   
+   If (Val &gt; 15) Then
+      Val = 15
+   End If
+   MeasLightIntensity = CByte(Val)
+End Function
+
+Sub Max7219Out16(ByVal X as Integer)
+' shifts out 16-bit quantity, most sig bit first
+   Dim N as integer
+   Dim Bit as Byte
+   Dim H as Byte, L as Byte
+
+   Call PutPin(CS, 1)
+
+   Call Putpin(CLK, 0)
+   Call Putpin(DAT, 0)
+   Call Putpin(CS, 0)
+
+   
+   ' split the integer into high and low bytes
+   H =  CByte(X\256)
+   L = CByte(X - (CInt(H)*256))
+
+   For N = 1 to 8 ' output the high byte
+      Bit = H AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) Then
+         ' Call PutB(1)   ' for debugging
+         Call Putpin(DAT, 1)
+      Else
+         ' Call PutB(0)
+         Call Putpin(DAT, 0)
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      H = H * 2
+   Next
+
+   'Call PutByte(Asc(" "))
+         
+   For N = 1 to 8 ' output the low byte
+      Bit = L AND bx10000000 
+            
+      If(Bit &lt;&gt; 0) then
+         'Call PutB(1)   
+    Call Putpin(DAT, 1)
+      Else
+         'Call PutB(0)
+         Call Putpin(DAT, 0)            
+      End if
+
+      Call Putpin(CLK, 1)
+      Call Putpin(CLK, 0)
+      L = L * 2  
+   Next
+   'Call NewLine()
+   Call Putpin(CS, 1)  
+End Sub   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE></BODY></HTML>
